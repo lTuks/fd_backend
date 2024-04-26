@@ -1,6 +1,6 @@
 annotated-types==0.6.0
 colorama==0.4.6
-pydantic_core==2.18.2
+pydantic_core==2.16.2
 PyJWT==2.8.0
 anyio==3.7.1
 asgiref==3.7.2
