@@ -64,14 +64,15 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.post("/pilotos/")
-def adicionar_piloto(piloto: Piloto):
+def adicionar_piloto(piloto: Piloto, current_user: User = Depends(get_current_user)):
     Campeonato.adicionar_piloto(piloto)
     return JSONResponse(status_code=201, content={"msg": f"Piloto {piloto.nome} adicionado com sucesso."})
 
 @app.patch("/pilotos/{nome_piloto}")
-def atualizar_pontuacao(nome_piloto: str, novas_notas: list[int]):
+def atualizar_pontuacao(nome_piloto: str, novas_notas: list[int], current_user: User = Depends(get_current_user)):
     Campeonato.atualizar_pontuacao(nome_piloto, novas_notas)
     return JSONResponse(status_code=200, content={"msg": f"Notas atualizadas e nova pontuação calculada para {nome_piloto}."})
+
 
 @app.get("/classificacao/")
 def obter_classificacao():
