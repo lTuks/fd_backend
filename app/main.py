@@ -8,7 +8,6 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.models import Campeonato, Piloto, User, db
 
 app = FastAPI()
-campeonato = Campeonato()
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 ALGORITHM = "HS256"
@@ -66,15 +65,15 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @app.post("/pilotos/")
 def adicionar_piloto(piloto: Piloto):
-    campeonato.adicionar_piloto(piloto)
+    Campeonato.adicionar_piloto(piloto)
     return JSONResponse(status_code=201, content={"msg": f"Piloto {piloto.nome} adicionado com sucesso."})
 
 @app.patch("/pilotos/{nome_piloto}")
 def atualizar_pontuacao(nome_piloto: str, novas_notas: list[int]):
-    campeonato.atualizar_pontuacao(nome_piloto, novas_notas)
+    Campeonato.atualizar_pontuacao(nome_piloto, novas_notas)
     return JSONResponse(status_code=200, content={"msg": f"Notas atualizadas e nova pontuação calculada para {nome_piloto}."})
 
 @app.get("/classificacao/")
 def obter_classificacao():
-    classificacao = campeonato.obter_classificacao()
+    classificacao = Campeonato.obter_classificacao()
     return JSONResponse(status_code=200, content={"classificacao": classificacao})
