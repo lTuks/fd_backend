@@ -48,16 +48,16 @@ class Piloto(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     nome: str
     numero: int
-    notas: List[int] = []
-    pontuacao: int = 0  # Pontuação inicial, atualizada pela média das notas
+    notas: list[int]
+    pontuacao: int  # Pontuação inicial, atualizada pela média das notas
 
 class Campeonato(BaseModel):
-    classificacao: List[Piloto] = []
+    classificacao: list[Piloto]
 
     def adicionar_piloto(self, piloto: Piloto):
         self.classificacao.append(piloto)
 
-    def atualizar_pontuacao(self, nome_piloto: str, novas_notas: List[int]):
+    def atualizar_pontuacao(self, nome_piloto: str, novas_notas: list[int]):
         for piloto in self.classificacao:
             if piloto.nome == nome_piloto:
                 piloto.notas.extend(novas_notas)
@@ -66,5 +66,5 @@ class Campeonato(BaseModel):
                 piloto.pontuacao = sum(piloto.notas) // len(piloto.notas) if piloto.notas else 0
                 break
 
-    def obter_classificacao(self) -> List[Piloto]:
+    def obter_classificacao(self) -> list[Piloto]:
         return sorted(self.classificacao, key=lambda x: x.pontuacao, reverse=True)

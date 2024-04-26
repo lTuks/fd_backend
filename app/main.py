@@ -70,7 +70,7 @@ def adicionar_piloto(piloto: Piloto):
     return JSONResponse(status_code=201, content={"msg": f"Piloto {piloto.nome} adicionado com sucesso."})
 
 @app.patch("/pilotos/{nome_piloto}")
-def atualizar_pontuacao(nome_piloto: str, novas_notas: List[int]):
+def atualizar_pontuacao(nome_piloto: str, novas_notas: list[int]):
     campeonato.atualizar_pontuacao(nome_piloto, novas_notas)
     return JSONResponse(status_code=200, content={"msg": f"Notas atualizadas e nova pontuação calculada para {nome_piloto}."})
 
