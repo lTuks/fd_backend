@@ -29,6 +29,7 @@ class PyObjectId(ObjectId):
 
 
 class User(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     username: str
     email: str
     password: str
@@ -52,6 +53,7 @@ class Piloto(BaseModel):
     pontuacao: int  # Pontuação inicial, atualizada pela média das notas
 
 class Campeonato(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     classificacao: list[Piloto]
 
     def adicionar_piloto(self, piloto: Piloto):
