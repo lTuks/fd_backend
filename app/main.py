@@ -5,7 +5,7 @@ import jwt
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from app.model import Campeonato, Piloto, User, db
+from app.models import Campeonato, Piloto, User, db
 
 app = FastAPI()
 campeonato = Campeonato()
