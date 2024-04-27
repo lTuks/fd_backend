@@ -4,9 +4,8 @@ from datetime import datetime, timedelta
 import jwt
 from fastapi import Depends, FastAPI, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
 
-from app.models import Campeonato, Piloto, User, db
+from app.models import Campeonato, Piloto, PyObjectId, User, db
 
 app = FastAPI()
 
