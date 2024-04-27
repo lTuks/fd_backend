@@ -67,7 +67,8 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @app.post("/pilotos/", dependencies=[Depends(get_current_user)])
 def adicionar_piloto(piloto: Piloto):
-    Piloto.create_piloto(piloto.dict(by_alias=True))
+    piloto_instance = Piloto(**piloto.dict(by_alias=True))
+    piloto_instance.create_piloto(piloto.dict(by_alias=True))
     return {"msg": f"Piloto {piloto.nome} adicionado com sucesso."}
 
 @app.patch("/pilotos/{nome_piloto}", dependencies=[Depends(get_current_user)])
