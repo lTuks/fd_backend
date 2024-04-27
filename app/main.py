@@ -95,6 +95,6 @@ def atualizar_pontuacao_de_piloto(campeonato_id: PyObjectId, nome_piloto: str, d
 
 @app.get("/campeonatos/{campeonato_id}/classificacao/", status_code=200)
 def obter_classificacao(campeonato_id: PyObjectId, response: Response):
-    classificacao = campeonato.get_ranking(campeonato_id)
+    classificacao = Campeonato.get_ranking(campeonato_id)
     response.status_code = status.HTTP_200_OK
     return {"classificacao": classificacao}
