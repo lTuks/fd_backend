@@ -71,12 +71,10 @@ class Campeonato(BaseModel):
         if campeonato:
             for piloto in campeonato['classificacao']:
                 if piloto['nome'] == nome_piloto:
-                    updated_notas = piloto['notas'] + novas_notas
-                    if len(updated_notas) > 6:
-                        updated_notas = updated_notas[:6]
-                    updated_pontuacao = sum(updated_notas) // len(updated_notas) if updated_notas else 0
+                    piloto['notas'] = novas_notas
+                    updated_pontuacao = sum(novas_notas) // len(novas_notas) if novas_notas else 0
                     db["campeonatos"].update_one({"_id": cls.id, "classificacao.nome": nome_piloto},
-                                                  {"$set": {"classificacao.$.notas": updated_notas,
+                                                  {"$set": {"classificacao.$.notas": novas_notas,
                                                             "classificacao.$.pontuacao": updated_pontuacao}})
                     break
 
