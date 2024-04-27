@@ -2,10 +2,10 @@ import os
 from datetime import datetime, timedelta
 
 import jwt
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, Response, status
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-
-from app.models import Campeonato, Piloto, User, db
+from models import Campeonato, Piloto, User, db, get_user_by_username
 
 app = FastAPI()
 
@@ -25,7 +25,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -38,19 +38,20 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
             raise credentials_exception
     except jwt.PyJWTError:
         raise credentials_exception
-    user = get_user_by_username(username)
+    user = await get_user_by_username(username)
     if user is None:
         raise credentials_exception
     return user
 
 @app.post("/users/", status_code=201)
-def create_user(user: User):
-    User.create_user_db(user.dict())
+async def create_user(user: User, response: Response):
+    await User.create_user_db(user.dict(by_alias=True))
+    response.status_code = status.HTTP_201_CREATED
     return {"username": user.username, "email": user.email}
 
 @app.post("/token")
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = User.get_user_by_username(form_data.username)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = await User.get_user_by_username(form_data.username)
     if not user or not User.verify_password(form_data.password, user['password']):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -63,18 +64,20 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.post("/pilotos/")
-def adicionar_piloto(piloto: Piloto, current_user: User = Depends(get_current_user)):
-    Campeonato.adicionar_piloto(piloto)
-    return JSONResponse(status_code=201, content={"msg": f"Piloto {piloto.nome} adicionado com sucesso."})
+@app.post("/pilotos/", dependencies=[Depends(get_current_user)])
+async def adicionar_piloto(piloto: Piloto):
+    await Piloto.create_piloto(piloto.dict(by_alias=True))
+    return {"msg": f"Piloto {piloto.nome} adicionado com sucesso."}
 
-@app.patch("/pilotos/{nome_piloto}")
-def atualizar_pontuacao(nome_piloto: str, novas_notas: list[int], current_user: User = Depends(get_current_user)):
-    Campeonato.atualizar_pontuacao(nome_piloto, novas_notas)
-    return JSONResponse(status_code=200, content={"msg": f"Notas atualizadas e nova pontuação calculada para {nome_piloto}."})
-
+@app.patch("/pilotos/{nome_piloto}", dependencies=[Depends(get_current_user)])
+async def atualizar_pontuacao(nome_piloto: str, novas_notas: list[int], current_user: User = Depends(get_current_user)):
+    sucesso = await Piloto.update_pontuacao(nome_piloto, novas_notas)
+    if sucesso:
+        return {"msg": f"Notas atualizadas e nova pontuação calculada para {nome_piloto}."}
+    else:
+        raise HTTPException(status_code=404, detail="Piloto não encontrado")
 
 @app.get("/classificacao/")
-def obter_classificacao():
-    classificacao = Campeonato.obter_classificacao()
-    return JSONResponse(status_code=200, content={"classificacao": classificacao})
+async def obter_classificacao():
+    classificacao = await Campeonato.obter_classificacao()
+    return {"classificacao": classificacao}
