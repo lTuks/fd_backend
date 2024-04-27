@@ -30,7 +30,6 @@ class PyObjectId(ObjectId):
 class User(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     username: str
-    email: str
     password: str
 
     def create_user_db(user_data: dict):

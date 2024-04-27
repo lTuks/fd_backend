@@ -52,7 +52,7 @@ async def home(response: Response):
 def create_user(user: User, response: Response):
     User.create_user_db(user.dict(by_alias=True))
     response.status_code = status.HTTP_201_CREATED
-    return {"username": user.username, "email": user.email}
+    return {"username": user.username}
 
 @app.post("/login", status_code=200)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
