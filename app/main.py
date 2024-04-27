@@ -45,7 +45,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 @app.get("/")
 async def home():
-    return JSONResponse(status_code=status.HTTP_200_OK, content="OK")
+    response.status_code = status.HTTP_200_OK
+    return {"Mensagem": "Ok"}
 
 @app.post("/users/", status_code=201)
 def create_user(user: User, response: Response):
