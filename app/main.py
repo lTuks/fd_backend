@@ -65,15 +65,19 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.post("/pilotos/", dependencies=[Depends(get_current_user)])
-def adicionar_piloto(piloto: Piloto):
-    piloto_instance = Campeonato(**piloto.dict(by_alias=True))
-    piloto_instance.adicionar_piloto(piloto.dict(by_alias=True))
-    return {"msg": f"Piloto {piloto.nome} adicionado com sucesso."}
+@app.post("/pilotos/{id_campeonato}", dependencies=[Depends(get_current_user)])
+def adicionar_piloto(piloto: Piloto, id_campeonato: str):
+    campeonato_id = id_campeonato  # você precisa especificar de alguma forma o ID do campeonato
+    campeonato_instance = Campeonato(id=campeonato_id)
+    piloto_data = piloto.dict(by_alias=True)
+    campeonato_instance.adicionar_piloto(piloto_data)
+    return {"msg": f"Piloto {piloto.nome} adicionado com sucesso ao campeonato."}
 
-@app.patch("/pilotos/{nome_piloto}", dependencies=[Depends(get_current_user)])
-def atualizar_pontuacao(nome_piloto: str, novas_notas: list[float], current_user: User = Depends(get_current_user)):
-    sucesso = Campeonato.atualizar_pontuacao(nome_piloto, novas_notas)
+@app.patch("/pilotos/{id_campeonato}/{nome_piloto}", dependencies=[Depends(get_current_user)])
+def atualizar_pontuacao(id_campeonato: str, nome_piloto: str, novas_notas: list[int], current_user: User = Depends(get_current_user)):
+    campeonato_id = id_campeonato  # você precisa especificar de alguma forma o ID do campeonato
+    campeonato_instance = Campeonato(id=campeonato_id)
+    sucesso = campeonato_instance.atualizar_pontuacao(nome_piloto, novas_notas)
     if sucesso:
         return {"msg": f"Notas atualizadas e nova pontuação calculada para {nome_piloto}."}
     else:
