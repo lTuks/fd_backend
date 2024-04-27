@@ -86,7 +86,6 @@ class Campeonato(BaseModel):
                                                             "classificacao.$.pontuacao": updated_pontuacao}})
                     break
 
-    @classmethod
     def obter_classificacao(cls):
         campeonato = db["campeonatos"].find_one({"_id": cls.id})
         if campeonato:

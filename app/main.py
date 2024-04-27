@@ -82,3 +82,11 @@ def atualizar_pontuacao(nome_piloto: str, novas_notas: list[int], current_user: 
 def obter_classificacao():
     classificacao = Campeonato.obter_classificacao()
     return {"classificacao": classificacao}
+
+@app.post("/campeonatos/", dependencies=[Depends(get_current_user)])
+def criar_campeonato(campeonato: Campeonato):
+    existing_campeonato = db["campeonatos"].find_one({"_id": campeonato.id})
+    if existing_campeonato:
+        raise HTTPException(status_code=400, detail="Campeonato já existe")
+    db["campeonatos"].insert_one(campeonato.dict(by_alias=True))
+    return {"msg": f"Campeonato criado com sucesso, ID: {campeonato.id}"}
