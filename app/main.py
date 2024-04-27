@@ -43,8 +43,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return user
 
-@app.get("/")
-async def home():
+@app.get("/", status_code=200)
+async def home(response: Response):
     response.status_code = status.HTTP_200_OK
     return {"Mensagem": "Ok"}
 
@@ -54,7 +54,7 @@ def create_user(user: User, response: Response):
     response.status_code = status.HTTP_201_CREATED
     return {"username": user.username, "email": user.email}
 
-@app.post("/login")
+@app.post("/login", status_code=200)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = User.get_user_by_username(form_data.username)
     if not user or not User.verify_password(form_data.password, user['password']):
@@ -69,32 +69,35 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.post("/piloto", dependencies=[Depends(get_current_user)])
-def create_pilot(piloto: Piloto):
+@app.post("/piloto", dependencies=[Depends(get_current_user)], status_code=201)
+def create_pilot(piloto: Piloto, response: Response):
     Piloto.create_pilot_db(piloto.dict(by_alias=True))
     response.status_code = status.HTTP_201_CREATED
     return {"piloto": piloto.nome, "numero": piloto.numero}
 
-@app.post("/campeonato", dependencies=[Depends(get_current_user)])
-def create_championship(campeonato: Campeonato):
+@app.post("/campeonato", dependencies=[Depends(get_current_user)], status_code=201)
+def create_championship(campeonato: Campeonato, response: Response):
     Campeonato.create_championship_db(campeonato.dict(by_alias=True))
     response.status_code = status.HTTP_201_CREATED
     return {"campeonato": campeonato.id}
 
-@app.post("/campeonatos/{campeonato_id}/pilotos/")
-def adicionar_piloto_a_campeonato(campeonato_id: PyObjectId, piloto_data: dict):
+@app.post("/campeonatos/{campeonato_id}/pilotos/", status_code=201)
+def adicionar_piloto_a_campeonato(campeonato_id: PyObjectId, piloto_data: dict, response: Response):
     campeonato = Campeonato(id=campeonato_id)
     campeonato.insert_pilot_db(piloto_data)
+    response.status_code = status.HTTP_201_CREATED
     return {"mensagem": "Piloto adicionado ao campeonato!"}
 
-@app.put("/campeonatos/{campeonato_id}/pontuacao/")
-def atualizar_pontuacao_de_piloto(campeonato_id: PyObjectId, nome_piloto: str, novas_notas: list[int]):
+@app.put("/campeonatos/{campeonato_id}/pontuacao/", status_code=201)
+def atualizar_pontuacao_de_piloto(campeonato_id: PyObjectId, nome_piloto: str, novas_notas: list[int], response: Response):
     campeonato = Campeonato(id=campeonato_id)
     campeonato.update_score_db(nome_piloto, novas_notas)
+    response.status_code = status.HTTP_201_CREATED
     return {"mensagem": "Pontuação do piloto atualizada!"}
 
-@app.get("/campeonatos/{campeonato_id}/classificacao/")
-def obter_classificacao(campeonato_id: PyObjectId):
+@app.get("/campeonatos/{campeonato_id}/classificacao/", status_code=200)
+def obter_classificacao(campeonato_id: PyObjectId, response: Response):
     campeonato = Campeonato(id=campeonato_id)
     classificacao = campeonato.get_ranking()
+    response.status_code = status.HTTP_200_OK
     return {"classificacao": classificacao}
