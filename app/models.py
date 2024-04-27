@@ -66,7 +66,7 @@ class Campeonato(BaseModel):
     def insert_pilot_db(id, piloto_data: dict):
         db["campeonatos"].update_one({"_id": id}, {"$push": {"classificacao": piloto_data}})
 
-    def update_score_db(id, nome_piloto: str, novas_notas: list[int]):
+    def update_score_db(id, nome_piloto: str, novas_notas: list[float]):
         campeonato = db["campeonatos"].find_one({"_id": id})
         if campeonato:
             for piloto in campeonato['classificacao']:
