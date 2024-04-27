@@ -79,25 +79,22 @@ def create_pilot(piloto: Piloto, response: Response):
 def create_championship(campeonato: Campeonato, response: Response):
     Campeonato.create_championship_db(campeonato.dict(by_alias=True))
     response.status_code = status.HTTP_201_CREATED
-    return {"campeonato": campeonato.id}
+    return {"campeonato": campeonato.nome}
 
 @app.post("/campeonatos/{campeonato_id}/pilotos/", status_code=201)
 def adicionar_piloto_a_campeonato(campeonato_id: PyObjectId, piloto_data: dict, response: Response):
-    campeonato = Campeonato(id=campeonato_id)
-    campeonato.insert_pilot_db(piloto_data)
+    Campeonato.insert_pilot_db(campeonato_id, piloto_data)
     response.status_code = status.HTTP_201_CREATED
     return {"mensagem": "Piloto adicionado ao campeonato!"}
 
 @app.put("/campeonatos/{campeonato_id}/pontuacao/", status_code=201)
 def atualizar_pontuacao_de_piloto(campeonato_id: PyObjectId, nome_piloto: str, novas_notas: list[int], response: Response):
-    campeonato = Campeonato(id=campeonato_id)
-    campeonato.update_score_db(nome_piloto, novas_notas)
+    Campeonato.update_score_db(campeonato_id, nome_piloto, novas_notas)
     response.status_code = status.HTTP_201_CREATED
     return {"mensagem": "Pontuação do piloto atualizada!"}
 
 @app.get("/campeonatos/{campeonato_id}/classificacao/", status_code=200)
 def obter_classificacao(campeonato_id: PyObjectId, response: Response):
-    campeonato = Campeonato(id=campeonato_id)
-    classificacao = campeonato.get_ranking()
+    classificacao = campeonato.get_ranking(campeonato_id)
     response.status_code = status.HTTP_200_OK
     return {"classificacao": classificacao}

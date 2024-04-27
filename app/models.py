@@ -63,11 +63,11 @@ class Campeonato(BaseModel):
     def create_championship_db(championship_data: dict):
         db["campeonatos"].insert_one(championship_data)
 
-    def insert_pilot_db(cls, piloto_data: dict):
-        db["campeonatos"].update_one({"_id": cls.id}, {"$push": {"classificacao": piloto_data}})
+    def insert_pilot_db(id, piloto_data: dict):
+        db["campeonatos"].update_one({"_id": id}, {"$push": {"classificacao": piloto_data}})
 
-    def update_score_db(cls, nome_piloto: str, novas_notas: list[int]):
-        campeonato = db["campeonatos"].find_one({"_id": cls.id})
+    def update_score_db(id, nome_piloto: str, novas_notas: list[int]):
+        campeonato = db["campeonatos"].find_one({"_id": id})
         if campeonato:
             for piloto in campeonato['classificacao']:
                 if piloto['nome'] == nome_piloto:
@@ -80,8 +80,8 @@ class Campeonato(BaseModel):
                                                             "classificacao.$.pontuacao": updated_pontuacao}})
                     break
 
-    def get_ranking(cls):
-        campeonato = db["campeonatos"].find_one({"_id": cls.id})
+    def get_ranking(id):
+        campeonato = db["campeonatos"].find_one({"_id": id})
         if campeonato:
             return sorted(campeonato['classificacao'], key=lambda x: x['pontuacao'], reverse=True)
         return []
