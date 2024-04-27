@@ -3,11 +3,20 @@ from datetime import datetime, timedelta
 
 import jwt
 from fastapi import Depends, FastAPI, HTTPException, Response, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from app.models import Campeonato, Piloto, PontuacaoInput, PyObjectId, User, db
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=["token"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 ALGORITHM = "HS256"
