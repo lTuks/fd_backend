@@ -53,7 +53,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     return user
 
 @app.get("/", status_code=200)
-async def home(response: Response):
+def home(response: Response):
     response.status_code = status.HTTP_200_OK
     return {"Mensagem": "Ok"}
 
@@ -84,11 +84,29 @@ def create_pilot(piloto: Piloto, response: Response):
     response.status_code = status.HTTP_201_CREATED
     return {"piloto": piloto.nome, "numero": piloto.numero}
 
+@app.get("/piloto/{nome_piloto}", dependencies=[Depends(get_current_user)], status_code=201)
+def get_one_pilot(nome_piloto: str, response: Response):
+    pilot = Piloto.get_one_pilot_db(nome_piloto)
+    response.status_code = status.HTTP_200_OK
+    return {"piloto": pilot}
+
+@app.get("/pilotos/", dependencies=[Depends(get_current_user)], status_code=200)
+def get_pilotos(response: Response):
+    pilots = Piloto.get_pilot_db()
+    response.status_code = status.HTTP_200_OK
+    return {"pilotos": pilots}
+
 @app.post("/campeonato", dependencies=[Depends(get_current_user)], status_code=201)
 def create_championship(campeonato: Campeonato, response: Response):
     Campeonato.create_championship_db(campeonato.dict(by_alias=True))
     response.status_code = status.HTTP_201_CREATED
     return {"campeonato": campeonato.nome}
+
+@app.get("/campeonato/", status_code=200)
+def get_Championships(response: Response):
+    championships = Campeonato.get_championship_db()
+    response.status_code = status.HTTP_200_OK
+    return {"campeonato": championships}
 
 @app.post("/campeonatos/{campeonato_id}/pilotos/", dependencies=[Depends(get_current_user)], status_code=201)
 def adicionar_piloto_a_campeonato(campeonato_id: PyObjectId, piloto_data: dict, response: Response):
