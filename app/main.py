@@ -39,20 +39,20 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
             raise credentials_exception
     except jwt.PyJWTError:
         raise credentials_exception
-    user = await User.get_user_by_username(username)
+    user = User.get_user_by_username(username)
     if user is None:
         raise credentials_exception
     return user
 
 @app.post("/users/", status_code=201)
 def create_user(user: User, response: Response):
-    await User.create_user_db(user.dict(by_alias=True))
+    User.create_user_db(user.dict(by_alias=True))
     response.status_code = status.HTTP_201_CREATED
     return {"username": user.username, "email": user.email}
 
 @app.post("/token")
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await User.get_user_by_username(form_data.username)
+    user = User.get_user_by_username(form_data.username)
     if not user or not User.verify_password(form_data.password, user['password']):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -67,12 +67,12 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @app.post("/pilotos/", dependencies=[Depends(get_current_user)])
 def adicionar_piloto(piloto: Piloto):
-    await Piloto.create_piloto(piloto.dict(by_alias=True))
+    Piloto.create_piloto(piloto.dict(by_alias=True))
     return {"msg": f"Piloto {piloto.nome} adicionado com sucesso."}
 
 @app.patch("/pilotos/{nome_piloto}", dependencies=[Depends(get_current_user)])
 def atualizar_pontuacao(nome_piloto: str, novas_notas: list[int], current_user: User = Depends(get_current_user)):
-    sucesso = await Piloto.update_pontuacao(nome_piloto, novas_notas)
+    sucesso = Piloto.update_pontuacao(nome_piloto, novas_notas)
     if sucesso:
         return {"msg": f"Notas atualizadas e nova pontuação calculada para {nome_piloto}."}
     else:
@@ -80,5 +80,5 @@ def atualizar_pontuacao(nome_piloto: str, novas_notas: list[int], current_user: 
 
 @app.get("/classificacao/")
 def obter_classificacao():
-    classificacao = await Campeonato.obter_classificacao()
+    classificacao = Campeonato.obter_classificacao()
     return {"classificacao": classificacao}
