@@ -26,7 +26,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -45,13 +45,13 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return user
 
 @app.post("/users/", status_code=201)
-async def create_user(user: User, response: Response):
+def create_user(user: User, response: Response):
     await User.create_user_db(user.dict(by_alias=True))
     response.status_code = status.HTTP_201_CREATED
     return {"username": user.username, "email": user.email}
 
 @app.post("/token")
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await User.get_user_by_username(form_data.username)
     if not user or not User.verify_password(form_data.password, user['password']):
         raise HTTPException(
@@ -66,12 +66,12 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.post("/pilotos/", dependencies=[Depends(get_current_user)])
-async def adicionar_piloto(piloto: Piloto):
+def adicionar_piloto(piloto: Piloto):
     await Piloto.create_piloto(piloto.dict(by_alias=True))
     return {"msg": f"Piloto {piloto.nome} adicionado com sucesso."}
 
 @app.patch("/pilotos/{nome_piloto}", dependencies=[Depends(get_current_user)])
-async def atualizar_pontuacao(nome_piloto: str, novas_notas: list[int], current_user: User = Depends(get_current_user)):
+def atualizar_pontuacao(nome_piloto: str, novas_notas: list[int], current_user: User = Depends(get_current_user)):
     sucesso = await Piloto.update_pontuacao(nome_piloto, novas_notas)
     if sucesso:
         return {"msg": f"Notas atualizadas e nova pontuação calculada para {nome_piloto}."}
@@ -79,6 +79,6 @@ async def atualizar_pontuacao(nome_piloto: str, novas_notas: list[int], current_
         raise HTTPException(status_code=404, detail="Piloto não encontrado")
 
 @app.get("/classificacao/")
-async def obter_classificacao():
+def obter_classificacao():
     classificacao = await Campeonato.obter_classificacao()
     return {"classificacao": classificacao}
