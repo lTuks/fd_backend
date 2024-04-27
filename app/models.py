@@ -27,7 +27,6 @@ class PyObjectId(ObjectId):
     def __get_pydantic_json_schema__(cls, field_schema):
         field_schema.update(type="string")
 
-
 class User(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     username: str
@@ -49,23 +48,25 @@ class Piloto(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     nome: str
     numero: int
-    notas: list[float] = []
-    pontuacao: float = 0
+    notas: Optional[list[float]]
+    pontuacao: Optional[float]
 
-    def create_piloto(cls, piloto_data: dict):
-        db["pilotos"].insert_one(piloto_data)
-
-    def get_piloto_by_nome(cls, nome: str):
-        return db["pilotos"].find_one({"nome": nome})
+    def create_pilot_db(pilot_data: dict):
+        db["pilotos"].insert_one(pilot_data)
 
 class Campeonato(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    classificacao: list[Piloto]
+    nome: str
+    seasion: int
+    classificacao: Optional[list[Piloto]]
 
-    def adicionar_piloto(cls, piloto_data: dict):
+    def create_championship_db(championship_data: dict):
+        db["campeonatos"].insert_one(championship_data)
+
+    def insert_pilot_db(cls, piloto_data: dict):
         db["campeonatos"].update_one({"_id": cls.id}, {"$push": {"classificacao": piloto_data}})
 
-    def atualizar_pontuacao(cls, nome_piloto: str, novas_notas: list[int]):
+    def update_score_db(cls, nome_piloto: str, novas_notas: list[int]):
         campeonato = db["campeonatos"].find_one({"_id": cls.id})
         if campeonato:
             for piloto in campeonato['classificacao']:
@@ -79,7 +80,7 @@ class Campeonato(BaseModel):
                                                             "classificacao.$.pontuacao": updated_pontuacao}})
                     break
 
-    def obter_classificacao(cls):
+    def get_ranking(cls):
         campeonato = db["campeonatos"].find_one({"_id": cls.id})
         if campeonato:
             return sorted(campeonato['classificacao'], key=lambda x: x['pontuacao'], reverse=True)

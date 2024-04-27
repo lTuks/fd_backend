@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 
 import jwt
 from fastapi import Depends, FastAPI, HTTPException, Response, status
-from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from app.models import Campeonato, Piloto, User, db
@@ -44,13 +43,17 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return user
 
+@app.get("/")
+async def home():
+    return JSONResponse(status_code=status.HTTP_200_OK, content="OK")
+
 @app.post("/users/", status_code=201)
 def create_user(user: User, response: Response):
     User.create_user_db(user.dict(by_alias=True))
     response.status_code = status.HTTP_201_CREATED
     return {"username": user.username, "email": user.email}
 
-@app.post("/token")
+@app.post("/login")
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = User.get_user_by_username(form_data.username)
     if not user or not User.verify_password(form_data.password, user['password']):
@@ -65,33 +68,32 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.post("/pilotos/{id_campeonato}", dependencies=[Depends(get_current_user)])
-def adicionar_piloto(piloto: Piloto, id_campeonato: str):
-    campeonato_id = id_campeonato  # você precisa especificar de alguma forma o ID do campeonato
-    campeonato_instance = Campeonato(id=campeonato_id)
-    piloto_data = piloto.dict(by_alias=True)
-    campeonato_instance.adicionar_piloto(piloto_data)
-    return {"msg": f"Piloto {piloto.nome} adicionado com sucesso ao campeonato."}
+@app.post("/piloto", dependencies=[Depends(get_current_user)])
+def create_pilot(piloto: Piloto):
+    Piloto.create_pilot_db(piloto.dict(by_alias=True))
+    response.status_code = status.HTTP_201_CREATED
+    return {"piloto": piloto.nome, "numero": piloto.numero}
 
-@app.patch("/pilotos/{id_campeonato}/{nome_piloto}", dependencies=[Depends(get_current_user)])
-def atualizar_pontuacao(id_campeonato: str, nome_piloto: str, novas_notas: list[int], current_user: User = Depends(get_current_user)):
-    campeonato_id = id_campeonato  # você precisa especificar de alguma forma o ID do campeonato
-    campeonato_instance = Campeonato(id=campeonato_id)
-    sucesso = campeonato_instance.atualizar_pontuacao(nome_piloto, novas_notas)
-    if sucesso:
-        return {"msg": f"Notas atualizadas e nova pontuação calculada para {nome_piloto}."}
-    else:
-        raise HTTPException(status_code=404, detail="Piloto não encontrado")
+@app.post("/campeonato", dependencies=[Depends(get_current_user)])
+def create_championship(campeonato: Campeonato):
+    Campeonato.create_championship_db(campeonato.dict(by_alias=True))
+    response.status_code = status.HTTP_201_CREATED
+    return {"campeonato": campeonato.id}
 
-@app.get("/classificacao/")
-def obter_classificacao():
-    classificacao = Campeonato.obter_classificacao()
+@app.post("/campeonatos/{campeonato_id}/pilotos/")
+def adicionar_piloto_a_campeonato(campeonato_id: PyObjectId, piloto_data: dict):
+    campeonato = Campeonato(id=campeonato_id)
+    campeonato.insert_pilot_db(piloto_data)
+    return {"mensagem": "Piloto adicionado ao campeonato!"}
+
+@app.put("/campeonatos/{campeonato_id}/pontuacao/")
+def atualizar_pontuacao_de_piloto(campeonato_id: PyObjectId, nome_piloto: str, novas_notas: list[int]):
+    campeonato = Campeonato(id=campeonato_id)
+    campeonato.update_score_db(nome_piloto, novas_notas)
+    return {"mensagem": "Pontuação do piloto atualizada!"}
+
+@app.get("/campeonatos/{campeonato_id}/classificacao/")
+def obter_classificacao(campeonato_id: PyObjectId):
+    campeonato = Campeonato(id=campeonato_id)
+    classificacao = campeonato.get_ranking()
     return {"classificacao": classificacao}
-
-@app.post("/campeonatos/", dependencies=[Depends(get_current_user)])
-def criar_campeonato(campeonato: Campeonato):
-    existing_campeonato = db["campeonatos"].find_one({"_id": campeonato.id})
-    if existing_campeonato:
-        raise HTTPException(status_code=400, detail="Campeonato já existe")
-    db["campeonatos"].insert_one(campeonato.dict(by_alias=True))
-    return {"msg": f"Campeonato criado com sucesso, ID: {campeonato.id}"}
