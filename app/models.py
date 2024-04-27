@@ -49,8 +49,8 @@ class Piloto(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     nome: str
     numero: int
-    notas: list[int] = []
-    pontuacao: int = 0
+    notas: list[float] = []
+    pontuacao: float = 0
 
     def create_piloto(cls, piloto_data: dict):
         db["pilotos"].insert_one(piloto_data)
@@ -58,13 +58,6 @@ class Piloto(BaseModel):
     def get_piloto_by_nome(cls, nome: str):
         return db["pilotos"].find_one({"nome": nome})
 
-    def update_pontuacao(cls, nome: str, novas_notas: list[int]):
-        piloto = cls.get_piloto_by_nome(nome)
-        if piloto:
-            nova_pontuacao = sum(novas_notas) + piloto.get("pontuacao", 0)
-            db["pilotos"].update_one({"nome": nome}, {"$set": {"pontuacao": nova_pontuacao, "notas": piloto.get("notas", []) + novas_notas}})
-            return True
-        return False
 class Campeonato(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     classificacao: list[Piloto]

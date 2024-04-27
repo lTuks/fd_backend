@@ -68,12 +68,12 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
 @app.post("/pilotos/", dependencies=[Depends(get_current_user)])
 def adicionar_piloto(piloto: Piloto):
     piloto_instance = Piloto(**piloto.dict(by_alias=True))
-    piloto_instance.create_piloto(piloto.dict(by_alias=True))
+    piloto_instance.adicionar_piloto(piloto.dict(by_alias=True))
     return {"msg": f"Piloto {piloto.nome} adicionado com sucesso."}
 
 @app.patch("/pilotos/{nome_piloto}", dependencies=[Depends(get_current_user)])
-def atualizar_pontuacao(nome_piloto: str, novas_notas: list[int], current_user: User = Depends(get_current_user)):
-    sucesso = Piloto.update_pontuacao(nome_piloto, novas_notas)
+def atualizar_pontuacao(nome_piloto: str, novas_notas: list[float], current_user: User = Depends(get_current_user)):
+    sucesso = Campeonato.atualizar_pontuacao(nome_piloto, novas_notas)
     if sucesso:
         return {"msg": f"Notas atualizadas e nova pontuação calculada para {nome_piloto}."}
     else:
