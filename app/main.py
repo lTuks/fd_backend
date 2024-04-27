@@ -88,8 +88,8 @@ def adicionar_piloto_a_campeonato(campeonato_id: PyObjectId, piloto_data: dict, 
     return {"mensagem": "Piloto adicionado ao campeonato!"}
 
 @app.put("/campeonatos/{campeonato_id}/pontuacao/", dependencies=[Depends(get_current_user)], status_code=201)
-def atualizar_pontuacao_de_piloto(campeonato_id: PyObjectId, nome_piloto: str, novas_notas: list[float], response: Response):
-    Campeonato.update_score_db(campeonato_id, nome_piloto, novas_notas)
+def atualizar_pontuacao_de_piloto(campeonato_id: PyObjectId, nome_piloto: str, dados: PontuacaoInput, response: Response):
+    Campeonato.update_score_db(campeonato_id, nome_piloto, dados.novas_notas)
     response.status_code = status.HTTP_201_CREATED
     return {"mensagem": "Pontuação do piloto atualizada!"}
 

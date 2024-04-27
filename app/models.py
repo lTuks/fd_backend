@@ -53,7 +53,10 @@ class Piloto(BaseModel):
 
     def create_pilot_db(pilot_data: dict):
         db["pilotos"].insert_one(pilot_data)
-
+class PontuacaoInput(BaseModel):
+    novas_notas: list[float] = Field(..., 
+    example=[5.0, 3.0, 1.0, 5.0, 2.0, 3.0], 
+    description="Lista de novas notas para o piloto")
 class Campeonato(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     nome: str
