@@ -86,7 +86,7 @@ def create_pilot(piloto: Piloto, response: Response):
 
 @app.get("/piloto/{nome_piloto}", dependencies=[Depends(get_current_user)], status_code=201)
 def get_one_pilot(nome_piloto: str):
-    pilot = get_one_pilot_db(nome_piloto)
+    pilot = Piloto.get_one_pilot_db(nome_piloto)
     return {"piloto": pilot}
 
 @app.get("/pilotos/", dependencies=[Depends(get_current_user)], status_code=200)
