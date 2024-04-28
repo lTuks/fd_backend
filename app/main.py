@@ -85,15 +85,13 @@ def create_pilot(piloto: Piloto, response: Response):
     return {"piloto": piloto.nome, "numero": piloto.numero}
 
 @app.get("/piloto/{nome_piloto}", dependencies=[Depends(get_current_user)], status_code=201)
-def get_one_pilot(nome_piloto: str, response: Response):
-    pilot = Piloto.get_one_pilot_db(nome_piloto)
-    response.status_code = status.HTTP_200_OK
+def get_one_pilot(nome_piloto: str):
+    pilot = get_one_pilot_db(nome_piloto)
     return {"piloto": pilot}
 
 @app.get("/pilotos/", dependencies=[Depends(get_current_user)], status_code=200)
 def get_pilotos(response: Response):
-    pilots = Piloto.get_pilot_db()
-    response.status_code = status.HTTP_200_OK
+    pilots = list(db["pilotos"].find({}, {'_id': 0}))
     return {"pilotos": pilots}
 
 @app.post("/campeonato", dependencies=[Depends(get_current_user)], status_code=201)
@@ -104,9 +102,8 @@ def create_championship(campeonato: Campeonato, response: Response):
 
 @app.get("/campeonato/", status_code=200)
 def get_Championships(response: Response):
-    championships = Campeonato.get_championship_db()
-    response.status_code = status.HTTP_200_OK
-    return {"campeonato": championships}
+    championships = list(db["campeonatos"].find({}, {'_id': 0}))  # Exclui o campo '_id' na resposta
+    return {"campeonatos": championships}
 
 @app.post("/campeonatos/{campeonato_id}/pilotos/", dependencies=[Depends(get_current_user)], status_code=201)
 def adicionar_piloto_a_campeonato(campeonato_id: PyObjectId, piloto_data: dict, response: Response):

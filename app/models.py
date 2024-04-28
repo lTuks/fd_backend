@@ -53,11 +53,11 @@ class Piloto(BaseModel):
     def create_pilot_db(pilot_data: dict):
         db["pilotos"].insert_one(pilot_data)
 
-    def get_pilot_db():
-        return db["pilotos"].find()
-
-    def get_one_pilot_db(name):
-        return db["pilotos"].find_one({"nome": name})
+def get_one_pilot_db(name):
+    pilot = db["pilotos"].find_one({"nome": name})
+    if not pilot:
+        raise HTTPException(status_code=404, detail="Pilot not found")
+    return pilot
 class PontuacaoInput(BaseModel):
     novas_notas: list[float] = Field(..., 
     example=[5.0, 3.0, 1.0], 
@@ -85,9 +85,6 @@ class Campeonato(BaseModel):
                                                   {"$set": {"classificacao.$.notas": novas_notas,
                                                             "classificacao.$.pontuacao": updated_pontuacao}})
                     break
-
-    def get_championship_db():
-        return db["campeonatos"].find()
 
     def get_ranking(id):
         campeonato = db["campeonatos"].find_one({"_id": id})
