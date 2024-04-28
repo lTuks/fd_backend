@@ -53,11 +53,6 @@ class Piloto(BaseModel):
     def create_pilot_db(pilot_data: dict):
         db["pilotos"].insert_one(pilot_data)
 
-    def get_one_pilot_db(name):
-        pilot = db["pilotos"].find_one({"nome": name})
-        if not pilot:
-            raise HTTPException(status_code=404, detail="Pilot not found")
-        return pilot
 class PontuacaoInput(BaseModel):
     novas_notas: list[float] = Field(..., 
     example=[5.0, 3.0, 1.0], 

@@ -3,8 +3,10 @@ from datetime import datetime, timedelta
 
 import jwt
 from fastapi import Depends, FastAPI, HTTPException, Response, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from unidecode import unidecode
 
 from app.models import Campeonato, Piloto, PontuacaoInput, PyObjectId, User, db
 
@@ -86,7 +88,16 @@ def create_pilot(piloto: Piloto, response: Response):
 
 @app.get("/piloto/{nome_piloto}", dependencies=[Depends(get_current_user)], status_code=201)
 def get_one_pilot(nome_piloto: str):
-    pilot = Piloto.get_one_pilot_db(nome_piloto)
+    pilots = []
+    pilots_filter = []
+
+    for pilot in db["pilotos"].find():
+        pilots.append(Piloto(**pilot))
+    pilots = jsonable_encoder(pilots)
+    
+    for i in range(len(pilots)):
+        if id in unidecode(pilots[i]["_id"]).lower():
+            pilots_filter.append(pilots[i]) 
     return {"piloto": pilot}
 
 @app.get("/pilotos/", dependencies=[Depends(get_current_user)], status_code=200)
@@ -102,7 +113,10 @@ def create_championship(campeonato: Campeonato, response: Response):
 
 @app.get("/campeonato/", status_code=200)
 def get_Championships(response: Response):
-    championships = list(db["campeonatos"].find({}))
+    championships = []
+    for championship in db["campeonatos"].find():
+        championships.append(Campeonato(**championship))
+        championships = jsonable_encoder(championships)
     return {"campeonatos": championships}
 
 @app.post("/campeonatos/{campeonato_id}/pilotos/", dependencies=[Depends(get_current_user)], status_code=201)
