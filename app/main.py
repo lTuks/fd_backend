@@ -5,6 +5,7 @@ import jwt
 from fastapi import Depends, FastAPI, HTTPException, Response, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from unidecode import unidecode
 
@@ -96,7 +97,7 @@ def get_one_pilot(nome_piloto: str):
     pilots = jsonable_encoder(pilots)
     
     for i in range(len(pilots)):
-        if id in unidecode(pilots[i]["_id"]).lower():
+        if id in unidecode(pilots[i]["nome"]).lower():
             pilots_filter.append(pilots[i]) 
     return {"piloto": pilot}
 
@@ -111,13 +112,13 @@ def create_championship(campeonato: Campeonato, response: Response):
     response.status_code = status.HTTP_201_CREATED
     return {"campeonato": campeonato.nome}
 
-@app.get("/campeonato/", status_code=200)
+@app.get("/campeonato/", dependencies=[Depends(get_current_user)])
 def get_Championships(response: Response):
     championships = []
     for championship in db["campeonatos"].find():
         championships.append(Campeonato(**championship))
         championships = jsonable_encoder(championships)
-    return {"campeonatos": championships}
+    return JSONResponse(status_code=status.HTTP_200_OK, content=championships)
 
 @app.post("/campeonatos/{campeonato_id}/pilotos/", dependencies=[Depends(get_current_user)], status_code=201)
 def adicionar_piloto_a_campeonato(campeonato_id: PyObjectId, piloto_data: dict, response: Response):

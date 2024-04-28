@@ -42,6 +42,10 @@ class User(BaseModel):
 
     def verify_password(plain_password, hashed_password):
         return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password)
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
 
 class Piloto(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
@@ -52,6 +56,10 @@ class Piloto(BaseModel):
 
     def create_pilot_db(pilot_data: dict):
         db["pilotos"].insert_one(pilot_data)
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
 
 class PontuacaoInput(BaseModel):
     novas_notas: list[float] = Field(..., 
@@ -86,3 +94,7 @@ class Campeonato(BaseModel):
         if campeonato:
             return sorted(campeonato['classificacao'], key=lambda x: x['pontuacao'], reverse=True)
         return []
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
