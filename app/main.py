@@ -102,7 +102,7 @@ def create_championship(campeonato: Campeonato, response: Response):
 
 @app.get("/campeonato/", status_code=200)
 def get_Championships(response: Response):
-    championships = list(db["campeonatos"].find({}, {'_id': 0}))  # Exclui o campo '_id' na resposta
+    championships = list(db["campeonatos"].find({}))
     return {"campeonatos": championships}
 
 @app.post("/campeonatos/{campeonato_id}/pilotos/", dependencies=[Depends(get_current_user)], status_code=201)
