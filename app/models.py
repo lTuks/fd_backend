@@ -58,7 +58,7 @@ class Piloto(BaseModel):
         db["pilotos"].insert_one(pilot_data)
 
     def get_pilots_db():
-        pilots = list(db["pilotos"].find({}, {'_id': 0}).sort([('nome', ASCENDING)]))
+        pilots = list(db["pilotos"].find({}).sort([('nome', ASCENDING)]))
         return {"pilotos": pilots}
     class Config:
         allow_population_by_field_name = True
