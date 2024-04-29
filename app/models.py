@@ -5,7 +5,7 @@ from typing import ClassVar, Optional
 import bcrypt
 from bson import ObjectId
 from pydantic import BaseModel, Field
-from pymongo import MongoClient
+from pymongo import ASCENDING, MongoClient
 
 # Conexão com o MongoDB
 URI = os.environ["MONGODB_URI"]
@@ -56,6 +56,10 @@ class Piloto(BaseModel):
 
     def create_pilot_db(pilot_data: dict):
         db["pilotos"].insert_one(pilot_data)
+
+    def get_pilots_db():
+        pilots = list(db["pilotos"].find({}, {'_id': 0}).sort([('nome', ASCENDING)]))
+    return {"pilotos": pilots}
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True

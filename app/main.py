@@ -103,9 +103,9 @@ def get_one_pilot(nome_piloto: str):
 
 @app.get("/pilotos/", dependencies=[Depends(get_current_user)], status_code=200)
 def get_pilotos(response: Response):
-    pilots = list(db["pilotos"].find({}, {'_id': 0}))
+    pilots = Piloto.get_pilots_db()
     return {"pilotos": pilots}
-
+    
 @app.post("/campeonato", dependencies=[Depends(get_current_user)], status_code=201)
 def create_championship(campeonato: Campeonato, response: Response):
     Campeonato.create_championship_db(campeonato.dict(by_alias=True))
