@@ -59,7 +59,7 @@ class Piloto(BaseModel):
 
     def get_pilots_db():
         pilots = list(db["pilotos"].find({}, {'_id': 0}).sort([('nome', ASCENDING)]))
-    return {"pilotos": pilots}
+        return {"pilotos": pilots}
     class Config:
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
