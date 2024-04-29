@@ -94,6 +94,11 @@ class Campeonato(BaseModel):
                                                             "classificacao.$.pontuacao": updated_pontuacao}})
                     break
 
+    def finish_championship(id):
+        campeonato = db["campeonatos"].find_one({"_id": id})
+        if campeonato:
+            db["campeonatos"].update_one({"_id": id,}, {"$set": {"status": false}})
+
     def get_ranking(id):
         campeonato = db["campeonatos"].find_one({"_id": id})
         if campeonato:

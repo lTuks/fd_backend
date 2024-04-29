@@ -132,6 +132,12 @@ def atualizar_pontuacao_de_piloto(campeonato_id: PyObjectId, nome_piloto: str, d
     response.status_code = status.HTTP_201_CREATED
     return {"mensagem": "Pontuação do piloto atualizada!"}
 
+@app.put("/campeonatos/{campeonato_id}/", dependencies=[Depends(get_current_user)], status_code=201)
+def finalizar_campeonato(campeonato_id: PyObjectId, response: Response):
+    Campeonato.finish_championship(campeonato_id, )
+    response.status_code = status.HTTP_200_OK
+    return {"mensagem": "Campeonato Encerrado!"}
+
 @app.get("/campeonatos/{campeonato_id}/classificacao/", status_code=200)
 def obter_classificacao(campeonato_id: PyObjectId, response: Response):
     classificacao = Campeonato.get_ranking(campeonato_id)
