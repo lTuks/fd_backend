@@ -74,6 +74,7 @@ class Campeonato(BaseModel):
     nome: str
     seasion: int
     classificacao: Optional[list[Piloto]]
+    status: bool
 
     def create_championship_db(championship_data: dict):
         db["campeonatos"].insert_one(championship_data)

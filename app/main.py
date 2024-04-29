@@ -105,7 +105,7 @@ def get_one_pilot(nome_piloto: str):
 def get_pilotos(response: Response):
     pilots = Piloto.get_pilots_db()
     return {"pilotos": pilots}
-    
+
 @app.post("/campeonato", dependencies=[Depends(get_current_user)], status_code=201)
 def create_championship(campeonato: Campeonato, response: Response):
     Campeonato.create_championship_db(campeonato.dict(by_alias=True))
@@ -115,9 +115,9 @@ def create_championship(campeonato: Campeonato, response: Response):
 @app.get("/campeonato/", dependencies=[Depends(get_current_user)])
 def get_Championships(response: Response):
     championships = []
-    for championship in db["campeonatos"].find():
+    for championship in db["campeonatos"].find({"status": True}):
         championships.append(Campeonato(**championship))
-        championships = jsonable_encoder(championships)
+    championships = jsonable_encoder(championships)
     return JSONResponse(status_code=status.HTTP_200_OK, content=championships)
 
 @app.post("/campeonatos/{campeonato_id}/pilotos/", dependencies=[Depends(get_current_user)], status_code=201)
