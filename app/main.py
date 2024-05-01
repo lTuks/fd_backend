@@ -112,7 +112,7 @@ def create_championship(campeonato: Campeonato, response: Response):
     response.status_code = status.HTTP_201_CREATED
     return {"campeonato": campeonato.nome}
 
-@app.get("/campeonato/", dependencies=[Depends(get_current_user)])
+@app.get("/campeonato/")
 def get_Championships(response: Response):
     championships = []
     for championship in db["campeonatos"].find({"status": True}):
